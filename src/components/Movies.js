@@ -1,10 +1,14 @@
 import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
 import Like from "./Like";
+import Pagination from "./Pagination";
+import { paginate } from "../utils/paginate";
 
 class Movies extends Component {
   state = {
-    movies: getMovies()
+    movies: getMovies(),
+    pageSize: 4,
+    currentPage: 1
   };
 
   renderMoviesStatusText() {
@@ -30,6 +34,10 @@ class Movies extends Component {
     this.setState({ movies });
   }
 
+  handlePageChange(page) {
+    this.setState({ currentPage: page });
+  }
+
   renderTableHeading() {
     return (
       <thead>
@@ -46,9 +54,11 @@ class Movies extends Component {
   }
 
   renderTableRows() {
+    const { movies: allMovies, currentPage, pageSize } = this.state;
+    const movies = paginate(allMovies, currentPage, pageSize);
     return (
       <tbody>
-        {this.state.movies.map(movie => (
+        {movies.map(movie => (
           <tr key={movie._id}>
             <td>{movie.title}</td>
             <td>{movie.genre.name}</td>
@@ -82,10 +92,18 @@ class Movies extends Component {
     );
   }
   render() {
+    const { movies, pageSize, currentPage } = this.state;
+
     return (
       <div>
         {this.renderMoviesStatusText()}
         {this.renderTable()}
+        <Pagination
+          totalItems={movies.length}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={page => this.handlePageChange(page)}
+        />
       </div>
     );
   }
