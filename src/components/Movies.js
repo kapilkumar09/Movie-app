@@ -1,15 +1,23 @@
 import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
-import Like from "./Like";
-import Pagination from "./Pagination";
+import { getGenres } from "../services/fakeGenreService";
+import Like from "../common/Like";
+import Pagination from "../common/Pagination";
+import Filter from "../common/Filter";
 import { paginate } from "../utils/paginate";
 
 class Movies extends Component {
   state = {
-    movies: getMovies(),
+    movies: [],
+    genres: [],
     pageSize: 4,
+    currentGenre: null,
     currentPage: 1
   };
+
+  componentDidMount() {
+    this.setState({ movies: getMovies(), genres: getGenres() });
+  }
 
   renderMoviesStatusText() {
     const { length: count } = this.state.movies;
@@ -20,6 +28,10 @@ class Movies extends Component {
       return <p>{`Showing ${count} movies in the database`}</p>;
     }
   }
+
+  handleGenreSelection = genre => {
+    this.setState({ currentGenre: genre });
+  };
 
   handleLike(movie) {
     const movies = [...this.state.movies];
@@ -54,7 +66,13 @@ class Movies extends Component {
   }
 
   renderTableRows() {
-    const { movies: allMovies, currentPage, pageSize } = this.state;
+    const {
+      movies: allMovies,
+      currentPage,
+      currentGenre,
+      pageSize
+    } = this.state;
+
     const movies = paginate(allMovies, currentPage, pageSize);
     return (
       <tbody>
@@ -92,18 +110,29 @@ class Movies extends Component {
     );
   }
   render() {
-    const { movies, pageSize, currentPage } = this.state;
+    const { movies, pageSize, currentPage, genres, currentGenre } = this.state;
 
     return (
-      <div>
-        {this.renderMoviesStatusText()}
-        {this.renderTable()}
-        <Pagination
-          totalItems={movies.length}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={page => this.handlePageChange(page)}
-        />
+      <div className="row">
+        <div className="col-2">
+          <Filter
+            genres={genres}
+            currentGenre={currentGenre}
+            textProperty="name"
+            valueProperty="_id"
+            onGenreSelection={this.handleGenreSelection}
+          />
+        </div>
+        <div className="col">
+          {this.renderMoviesStatusText()}
+          {this.renderTable()}
+          <Pagination
+            totalItems={movies.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={page => this.handlePageChange(page)}
+          />
+        </div>
       </div>
     );
   }
