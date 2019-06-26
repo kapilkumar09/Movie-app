@@ -31,7 +31,7 @@ class Movies extends Component {
   }
 
   handleGenreSelection = genre => {
-    this.setState({ currentGenre: genre });
+    this.setState({ currentGenre: genre, currentPage: 1 });
   };
 
   handleLike(movie) {
