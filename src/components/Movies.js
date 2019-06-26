@@ -1,18 +1,27 @@
 import React, { Component } from "react";
 import { getMovies } from "../services/fakeMovieService";
-import Like from "./Like";
-import Pagination from "./Pagination";
+import { getGenres } from "../services/fakeGenreService";
+import Like from "../common/Like";
+import Pagination from "../common/Pagination";
+import Filter from "../common/Filter";
 import { paginate } from "../utils/paginate";
 
 class Movies extends Component {
   state = {
-    movies: getMovies(),
+    movies: [],
+    genres: [],
     pageSize: 4,
+
     currentPage: 1
   };
 
-  renderMoviesStatusText() {
-    const { length: count } = this.state.movies;
+  componentDidMount() {
+    const genres = [{ name: "All Genre" }, ...getGenres()];
+    this.setState({ movies: getMovies(), genres });
+  }
+
+  renderMoviesStatusText(filteredMovies) {
+    const count = filteredMovies.length;
 
     if (count === 0) {
       return <p>There are no movies in the database</p>;
@@ -20,6 +29,10 @@ class Movies extends Component {
       return <p>{`Showing ${count} movies in the database`}</p>;
     }
   }
+
+  handleGenreSelection = genre => {
+    this.setState({ currentGenre: genre });
+  };
 
   handleLike(movie) {
     const movies = [...this.state.movies];
@@ -53,9 +66,10 @@ class Movies extends Component {
     );
   }
 
-  renderTableRows() {
-    const { movies: allMovies, currentPage, pageSize } = this.state;
-    const movies = paginate(allMovies, currentPage, pageSize);
+  renderTableRows(filteredMovies) {
+    const { currentPage, pageSize } = this.state;
+
+    const movies = paginate(filteredMovies, currentPage, pageSize);
     return (
       <tbody>
         {movies.map(movie => (
@@ -83,27 +97,47 @@ class Movies extends Component {
       </tbody>
     );
   }
-  renderTable() {
+  renderTable(filteredMovies) {
     return (
       <table className="table">
         {this.renderTableHeading()}
-        {this.renderTableRows()}
+        {this.renderTableRows(filteredMovies)}
       </table>
     );
   }
   render() {
-    const { movies, pageSize, currentPage } = this.state;
+    const {
+      movies: allMovies,
+      pageSize,
+      currentPage,
+      genres,
+      currentGenre
+    } = this.state;
+
+    const filteredMovies =
+      currentGenre && currentGenre._id
+        ? allMovies.filter(movie => currentGenre._id === movie.genre._id)
+        : allMovies;
 
     return (
-      <div>
-        {this.renderMoviesStatusText()}
-        {this.renderTable()}
-        <Pagination
-          totalItems={movies.length}
-          pageSize={pageSize}
-          currentPage={currentPage}
-          onPageChange={page => this.handlePageChange(page)}
-        />
+      <div className="row">
+        <div className="col-2">
+          <Filter
+            items={genres}
+            currentItem={currentGenre}
+            onItemSelection={this.handleGenreSelection}
+          />
+        </div>
+        <div className="col">
+          {this.renderMoviesStatusText(filteredMovies)}
+          {this.renderTable(filteredMovies)}
+          <Pagination
+            totalItems={filteredMovies.length}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            onPageChange={page => this.handlePageChange(page)}
+          />
+        </div>
       </div>
     );
   }
