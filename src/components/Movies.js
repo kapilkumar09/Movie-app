@@ -11,16 +11,17 @@ class Movies extends Component {
     movies: [],
     genres: [],
     pageSize: 4,
-    currentGenre: null,
+
     currentPage: 1
   };
 
   componentDidMount() {
-    this.setState({ movies: getMovies(), genres: getGenres() });
+    const genres = [{ name: "All Genre" }, ...getGenres()];
+    this.setState({ movies: getMovies(), genres });
   }
 
-  renderMoviesStatusText() {
-    const { length: count } = this.state.movies;
+  renderMoviesStatusText(filteredMovies) {
+    const count = filteredMovies.length;
 
     if (count === 0) {
       return <p>There are no movies in the database</p>;
@@ -65,15 +66,10 @@ class Movies extends Component {
     );
   }
 
-  renderTableRows() {
-    const {
-      movies: allMovies,
-      currentPage,
-      currentGenre,
-      pageSize
-    } = this.state;
+  renderTableRows(filteredMovies) {
+    const { currentPage, pageSize } = this.state;
 
-    const movies = paginate(allMovies, currentPage, pageSize);
+    const movies = paginate(filteredMovies, currentPage, pageSize);
     return (
       <tbody>
         {movies.map(movie => (
@@ -101,33 +97,42 @@ class Movies extends Component {
       </tbody>
     );
   }
-  renderTable() {
+  renderTable(filteredMovies) {
     return (
       <table className="table">
         {this.renderTableHeading()}
-        {this.renderTableRows()}
+        {this.renderTableRows(filteredMovies)}
       </table>
     );
   }
   render() {
-    const { movies, pageSize, currentPage, genres, currentGenre } = this.state;
+    const {
+      movies: allMovies,
+      pageSize,
+      currentPage,
+      genres,
+      currentGenre
+    } = this.state;
+
+    const filteredMovies =
+      currentGenre && currentGenre._id
+        ? allMovies.filter(movie => currentGenre._id === movie.genre._id)
+        : allMovies;
 
     return (
       <div className="row">
         <div className="col-2">
           <Filter
-            genres={genres}
-            currentGenre={currentGenre}
-            textProperty="name"
-            valueProperty="_id"
-            onGenreSelection={this.handleGenreSelection}
+            items={genres}
+            currentItem={currentGenre}
+            onItemSelection={this.handleGenreSelection}
           />
         </div>
         <div className="col">
-          {this.renderMoviesStatusText()}
-          {this.renderTable()}
+          {this.renderMoviesStatusText(filteredMovies)}
+          {this.renderTable(filteredMovies)}
           <Pagination
-            totalItems={movies.length}
+            totalItems={filteredMovies.length}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={page => this.handlePageChange(page)}

@@ -1,31 +1,40 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const Filter = props => {
   const {
-    genres,
-    onGenreSelection,
+    items,
+    onItemSelection,
     textProperty,
     valueProperty,
-    currentGenre
+    currentItem
   } = props;
   return (
     <ul className="list-group">
-      <li className="list-group-item">All Genres</li>
-      {genres.map(genre => (
+      {items.map(item => (
         <li
-          key={genre[valueProperty]}
+          key={item[valueProperty]}
           className={
-            currentGenre === genre
-              ? "list-group-item active"
-              : "list-group-item"
+            currentItem === item ? "list-group-item active" : "list-group-item"
           }
-          onClick={() => onGenreSelection(genre)}
+          onClick={() => onItemSelection(item)}
         >
-          {genre[textProperty]}
+          {item[textProperty]}
         </li>
       ))}
     </ul>
   );
+};
+
+Filter.defaultProps = {
+  textProperty: "name",
+  valueProperty: "_id"
+};
+
+Filter.propTypes = {
+  items: PropTypes.array.isRequired,
+  onItemsSelection: PropTypes.func.isRequired,
+  currentItem: PropTypes.object.isRequired
 };
 
 export default Filter;
