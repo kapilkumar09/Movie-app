@@ -55,8 +55,8 @@ class Movies extends Component {
     this.setState({ currentPage: page });
   }
 
-  handleSort = column => {
-    this.setState({ sortColumn: { column, order: "asc" } });
+  handleSort = sortColumn => {
+    this.setState({ sortColumn });
   };
 
   render() {
@@ -94,6 +94,7 @@ class Movies extends Component {
           {this.renderMoviesStatusText(filteredMovies)}
           <MoviesTable
             movies={movies}
+            sortColumn={sortColumn}
             onLike={this.handleLike}
             onDelete={this.handleDelete}
             onSort={this.handleSort}
