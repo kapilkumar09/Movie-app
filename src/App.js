@@ -6,6 +6,7 @@ import Customers from "../src/components/Customers";
 import Rentals from "../src/components/Rentals";
 import MovieForm from "../src/components/MovieForm";
 import NotFound from "../src/components/NotFound";
+import LoginForm from "../src/components/LoginForm";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <NavBar />
       <main className="container">
         <Switch>
+        <Route path="/loginForm" component={LoginForm} />
           <Route path="/movies" component={Movies} />
           <Route path="/customers" component={Customers} />
           <Route path="/rentals" component={Rentals} />
